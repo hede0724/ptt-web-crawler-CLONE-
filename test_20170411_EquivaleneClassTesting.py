@@ -148,6 +148,111 @@ class TestCrawlerByEquivalenceValeTest(unittest.TestCase):
             self.assertTrue('board' not in jsondata)
             self.assertTrue('article_id' not in jsondata)
         os.remove(filename)
-        
+    
+    # 測試情境 :  看板不存在，但文章存在
+    # 測試假看板，真實文章ID :  marvel2 (不存在),  [其他] 柯受良死因
+    def test_InvalidInput_NoneExistBoardName_1st(self):
+        crawler(['-b', 'marvel2', '-a', 'M.1491738343.A.276'])
+        filename = 'marvel2-M.1491738343.A.276.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
+    # 測試情境 :  看板不存在，但文章存在
+    # 測試假看板，真實文章ID :  Baseball2 (不存在),  [炸裂] 蔣智賢炸裂
+    def test_InvalidInput_NoneExistBoardName_2nd(self):
+        crawler(['-b', 'Baseball2', '-a', 'M.1491912774.A.B3E'])
+        filename = 'Baseball2-M.1491912774.A.B3E.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
+    # 測試情境 :  看板不存在，但文章存在
+    # 測試假看板，真實文章ID :  NCTU_TALK2 (不存在),  [討論] 交大人不可不交大事(幾近完整版)
+    def test_InvalidInput_NoneExistBoardName_3rd(self):
+        crawler(['-b', 'NCTU_TALK2', '-a', 'M.1451907241.A.D0D'])
+        filename = 'NCTU_TALK2-M.1451907241.A.D0D.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
+    # 測試情境 :  看板存在，但文章不存在 (不存在的文章，而非不存在此看板中)
+    # 測試看板 :  Gossip
+    def test_InvalidInput_NoneExistArticleID_1st(self):
+        crawler(['-b', 'Gossip', '-a', 'Hello_World'])
+        filename = 'Gossip-Hello_World.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
+    # 測試情境 :  看板存在，但文章不存在 (不存在的文章，而非不存在此看板中)
+    # 測試看板 :  NBA
+    def test_InvalidInput_NoneExistArticleID_2nd(self):
+        crawler(['-b', 'NBA', '-a', 'Hello_World'])
+        filename = 'NBA-Hello_World.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
+    # 測試情境 :  看板存在，但文章不存在 (不存在的文章，而非不存在此看板中)
+    # 測試看板 :  LoL
+    def test_InvalidInput_NoneExistArticleID_3rd(self):
+        crawler(['-b', 'LoL', '-a', 'Hello_World'])
+        filename = 'LoL-Hello_World.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
+    # 測試情境 :  看板不存在，文章也不存在 (不存在的文章，而非不存在此看板中)
+    # 測試輸入:  1234, abcd
+    def test_InvalidInput_NeitherBoardNameORArticleIDExists(self):
+        crawler(['-b', '1234', '-a', 'abcd'])
+        filename = '1234-abcd.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            # json 檔案內剩下一個 key : error
+            jsondata = json.load(f)
+            self.assertEqual(jsondata['error'], 'invalid url')
+            
+            # json 檔案內不存在正常情況下會出現的兩個 key : board && article_id
+            self.assertTrue('board' not in jsondata)
+            self.assertTrue('article_id' not in jsondata)
+        os.remove(filename)
+    
 if __name__ == '__main__':
     unittest.main()
