@@ -49,31 +49,32 @@ class PttWebCrawler(object):
             index = start
             filename = board + '-' + str(start) + '-' + str(end) + '.json'
             self.store(filename, u'{"articles": [', 'w')
-            for i in range(end-start+1):
-                index = start + i
-                print('Processing index:', str(index))
-                resp = requests.get(
-                    url=PTT_URL + '/bbs/' + board + '/index' + str(index) + '.html',
-                    cookies={'over18': '1'}, verify=VERIFY
-                )
-                if resp.status_code != 200:
-                    print('invalid url:', resp.url)
-                    continue
-                soup = BeautifulSoup(resp.text,  "html.parser")
-                divs = soup.find_all("div", "r-ent")
-                for div in divs:
-                    try:
-                        # ex. link would be <a href="/bbs/PublicServan/M.1127742013.A.240.html">Re: [問題] 職等</a>
-                        href = div.find('a')['href']
-                        link = PTT_URL + href
-                        article_id = re.sub('\.html', '', href.split('/')[-1])
-                        if div == divs[-1] and i == end-start:  # last div of last page
-                            self.store(filename, self.parse(link, article_id, board), 'a')
-                        else:
-                            self.store(filename, self.parse(link, article_id, board) + ',', 'a')
-                    except:
-                        pass
-                time.sleep(0.1)
+            if(self.InputIsValid(start,end,board,self.getLastPage(board))):
+                for i in range(end-start+1):
+                    index = start + i
+                    print('Processing index:', str(index))
+                    resp = requests.get(
+                        url=PTT_URL + '/bbs/' + board + '/index' + str(index) + '.html',
+                        cookies={'over18': '1'}, verify=VERIFY
+                    )
+                    if resp.status_code != 200:
+                        print('invalid url:', resp.url)
+                        continue
+                    soup = BeautifulSoup(resp.text)
+                    divs = soup.find_all("div", "r-ent")
+                    for div in divs:
+                        try:
+                            # ex. link would be <a href="/bbs/PublicServan/M.1127742013.A.240.html">Re: [問題] 職等</a>
+                            href = div.find('a')['href']
+                            link = PTT_URL + href
+                            article_id = re.sub('\.html', '', href.split('/')[-1])
+                            if div == divs[-1] and i == end-start:  # last div of last page
+                                self.store(filename, self.parse(link, article_id, board), 'a')
+                            else:
+                                self.store(filename, self.parse(link, article_id, board) + ',', 'a')
+                        except:
+                            pass
+                    time.sleep(0.1)
             self.store(filename, u']}', 'a')
         else:  # args.a
             article_id = args.a
@@ -88,7 +89,7 @@ class PttWebCrawler(object):
         if resp.status_code != 200:
             print('invalid url:', resp.url)
             return json.dumps({"error": "invalid url"}, sort_keys=True, ensure_ascii=False)
-        soup = BeautifulSoup(resp.text, "html.parser")
+        soup = BeautifulSoup(resp.text)
         main_content = soup.find(id="main-content")
         metas = main_content.select('div.article-metaline')
         author = ''
@@ -169,7 +170,24 @@ class PttWebCrawler(object):
         }
         # print 'original:', d
         return json.dumps(data, sort_keys=True, ensure_ascii=False)
-
+        
+    @staticmethod
+    def InputIsValid(start,end,board,last):
+        
+        if(start <= last and start >= 0 and end <= last and end >= 0):
+            return True
+        else:
+            if((start > last or start < 0) and (end > last or end < 0)):
+                print('Invalid startIndex and endIndex')
+                return False
+            elif((start > last or start < 0)):
+                print('Invalid startIndex')
+                return False
+            else:
+                print('Invalid endIndex')
+                return False
+            
+        
     @staticmethod
     def getLastPage(board):
         content = requests.get(
@@ -193,4 +211,4 @@ class PttWebCrawler(object):
             print(f)
 
 if __name__ == '__main__':
-    c = PttWebCrawler(['-b', 'NBA', '-i', '-1', '0'])
+    c = PttWebCrawler(['-b', 'PublicServan', '-i', '1', '2'])
