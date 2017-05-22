@@ -33,7 +33,7 @@ class PttWebCrawler(object):
         group.add_argument('-i', metavar=('START_INDEX', 'END_INDEX'), type=int, nargs=2, help="Start and end index")
         group.add_argument('-a', metavar='ARTICLE_ID', help="Article ID")
         parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
-
+        
         if cmdline:
             args = parser.parse_args(cmdline)
         else:
@@ -75,7 +75,7 @@ class PttWebCrawler(object):
                         except:
                             pass
                     time.sleep(0.1)
-            self.store(filename, u']}', 'a')
+            self.store(filename, u']}', 'a')            
         else:  # args.a
             article_id = args.a
             link = PTT_URL + '/bbs/' + board + '/' + article_id + '.html'
@@ -209,6 +209,24 @@ class PttWebCrawler(object):
         with codecs.open(filename, mode, encoding='utf-8') as f:
             j = json.load(f)
             print(f)
-
+            
+    @staticmethod
+    def get_author_name(board, author):
+        PTT_URL = 'https://www.ptt.cc'
+        _filename = board + '-' + author + '.json'
+    
+        LastIndex = PttWebCrawler.getLastPage(board)
+        PttWebCrawler(['-b', board, '-i', str(0), str(LastIndex)])
+        filename = board+'-'+str(0)+'-'+str(LastIndex)+'.json'
+        with codecs.open(filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        num = 0
+        for _article in data['articles']:
+            if author == _article['author']:
+                link = PTT_URL + '/bbs/' + board + '/' + _article['article_id'] + '.html'
+                num = num + 1
+        return num
+        
 if __name__ == '__main__':
-    c = PttWebCrawler(['-b', 'PublicServan', '-i', '1', '2'])
+    c = PttWebCrawler.get_author_name('NCTU_TALK', 'NCTUbigGG (交大大GG)')
