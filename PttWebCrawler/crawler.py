@@ -32,6 +32,8 @@ class PttWebCrawler(object):
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument('-i', metavar=('START_INDEX', 'END_INDEX'), type=int, nargs=2, help="Start and end index")
         group.add_argument('-a', metavar='ARTICLE_ID', help="Article ID")
+        parser.add_argument('-p', metavar='PushNum',type=int , help="PushNum")
+        parser.add_argument('-n',metavar='AuthorName',help = "AuthorName")
         parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
 
         if cmdline:
@@ -43,13 +45,19 @@ class PttWebCrawler(object):
         if args.i:
             start = args.i[0]
             if args.i[1] == -1:
-                end = self.getLastPage(board)
+                end = self.Stub_getLastPage(board)
+                #end = self.getLastPage(board)
             else:
                 end = args.i[1]
+                #end = args.i[1]
             index = start
             filename = board + '-' + str(start) + '-' + str(end) + '.json'
+            AuthorName = args.n
+            PushNum = args.p
+            #print('AuthorName=',AuthorName)
+            #print('pushNum=',PushNum)
             self.store(filename, u'{"articles": [', 'w')
-            if(self.InputIsValid(start,end,board,self.getLastPage(board))):
+            if(self.InputIsValid(start,end,board,self.Stub_getLastPage(board))):
                 for i in range(end-start+1):
                     index = start + i
                     print('Processing index:', str(index))
@@ -68,10 +76,11 @@ class PttWebCrawler(object):
                             href = div.find('a')['href']
                             link = PTT_URL + href
                             article_id = re.sub('\.html', '', href.split('/')[-1])
-                            if div == divs[-1] and i == end-start:  # last div of last page
-                                self.store(filename, self.parse(link, article_id, board), 'a')
-                            else:
-                                self.store(filename, self.parse(link, article_id, board) + ',', 'a')
+                            if((args.p and (self.Stub_getPush(link, article_id, board) > PushNum)) or not args.p  ):
+                                if div == divs[-1] and i == end-start:  # last div of last page
+                                    self.store(filename, self.parse(link, article_id, board), 'a')
+                                else:
+                                    self.store(filename, self.parse(link, article_id, board) + ',', 'a')
                         except:
                             pass
                     time.sleep(0.1)
@@ -170,7 +179,14 @@ class PttWebCrawler(object):
         }
         # print 'original:', d
         return json.dumps(data, sort_keys=True, ensure_ascii=False)
-        
+    @staticmethod
+    def Stub_getLastPage(board):
+        return 10
+    def Stub_isEqualWithName(link, article_id, board,Author):
+        return True
+    def Stub_getPush(link, article_id, board):
+        return 51
+    
     @staticmethod
     def InputIsValid(start,end,board,last):
         
@@ -187,6 +203,7 @@ class PttWebCrawler(object):
                 print('Invalid endIndex')
                 return False
             
+    
         
     @staticmethod
     def getLastPage(board):
