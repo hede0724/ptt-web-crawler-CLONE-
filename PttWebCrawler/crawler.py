@@ -76,8 +76,7 @@ class PttWebCrawler(object):
                             href = div.find('a')['href']
                             link = PTT_URL + href
                             article_id = re.sub('\.html', '', href.split('/')[-1])
-                            if((args.p and (self.Stub_getPush(link, article_id, board) > PushNum)) or not args.p  ):
-                                if((args.n and self.Stub_isEqualWithName(link, article_id, board,AuthorName)) or not args.n):
+                            if(((args.p and (self.getPush(link, article_id, board) > PushNum)) or not args.p) and ((args.n and self.isEqualWithName(link, article_id, board,AuthorName)) or not args.n)):
                                     if div == divs[-1] and i == end-start:  # last div of last page
                                         self.store(filename, self.parse(link, article_id, board), 'a')
                                     else:
@@ -183,7 +182,7 @@ class PttWebCrawler(object):
     @staticmethod
     def Stub_getLastPage(board):
         return 10
-    def Stub_isEqualWithName(link, article_id, board,Author):
+    def Stub_isEqualWithName(link, article_id, board,AuthorName):
         return True
     def Stub_getPush(link, article_id, board):
         return 51
@@ -205,6 +204,39 @@ class PttWebCrawler(object):
                 return False
             
     
+    @staticmethod
+    def isEqualWithName(link, article_id, board,AuthorName):
+        resp = requests.get(url=link, cookies={'over18': '1'}, verify=VERIFY)
+        soup = BeautifulSoup(resp.text)
+        main_content = soup.find(id="main-content")
+        metas = main_content.select('div.article-metaline')
+        author = ''
+        title = ''
+        date = ''
+        if metas:
+            author = metas[0].select('span.article-meta-value')[0].string if metas[0].select('span.article-meta-value')[0] else author
+        print('authorName',author)
+        if(AuthorName is author):
+            return True
+        else:
+            return False
+            
+    @staticmethod
+    def getPush(link, article_id, board):
+        resp = requests.get(url=link, cookies={'over18': '1'}, verify=VERIFY)
+        soup = BeautifulSoup(resp.text)
+        main_content = soup.find(id="main-content")
+        pushes = main_content.find_all('div', class_='push')
+        for push in pushes:
+            push.extract()
+        p = 0
+        for push in pushes:
+            if not push.find('span', 'push-tag'):
+                continue
+            push_tag = push.find('span', 'push-tag').string.strip(' \t\n\r')
+            if push_tag == u'推':
+                p += 1
+        return p    
         
     @staticmethod
     def getLastPage(board):
