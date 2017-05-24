@@ -1,12 +1,17 @@
 # vim: set ts=4 sw=4 et: -*- coding: utf-8 -*-
 import unittest
+import sys
 from PttWebCrawler.crawler import PttWebCrawler as crawler
 import codecs, json, os
+from io import StringIO
 
 class TestCrawlerByPathTesting(unittest.TestCase):
     #   Path Testing
     
-    #   21 -> 64
+    def setUp(self):
+        self.held, sys.stdout = sys.stdout, StringIO()
+    
+    #   Path01 : 21 -> 64
     #   測試功能 :  尋找某個版內是否存在某個 article_id 是否存在，
     #   若存在則回傳 文章的相關資訊，若否則會傳 'error'
     def test_Path01(self):
@@ -24,77 +29,19 @@ class TestCrawlerByPathTesting(unittest.TestCase):
             self.assertEqual(jsondata['article_id'], 'M.1491738343.A.276')
         os.remove(filename)
     
-    #   21 -> 22 -> 23 -> 29 -> 63
+    #   Path02 : 21 -> 22 -> 23 -> 29 -> 63
     #   測試功能 : 爬取某個板內的文章，以 start 跟 end index 來決定爬取的文章範圍
-    #   end index = -1 (= 整個版的 last article index)
+    #   23 : end index = -1 (= 整個版的 last article index)
+    #   36 failed : 不合法的輸入
     def test_path02(self):
-        crawler(['-b', 'CoLoR_BAND', '-i', '0', '-1'])
-        filename = 'CoLoR_BAND-0-9.json'
-        with codecs.open(filename, 'r', encoding='utf-8') as f:
-            jsondata = json.load(f)
-            self.assertEqual(len(jsondata['articles']),180)
+        crawler(['-b', 'CoLoR_BAND', '-i', '-2', '-1'])
+        filename = 'CoLoR_BAND--2--10.json'
+        with codecs.open(filename,'r',encoding='utf-8') as f:
+            data = json.load(f)
+            #self.assertEqual(len(data['articles']),11)
+            self.assertEqual(sys.stdout.getvalue(),'Invalid startIndex\n')
         os.remove(filename)
         
-    
-    # #   21 -> 22 -> 26 -> 29 -> 63
-    # def test_Path03(self):
         
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 63
-    # def test_Path04(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 63
-    # def test_Path05(self):
-        
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 37 -> 63
-    # def test_Path06(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 37 -> 63
-    # def test_Path07(self):
-        
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 37 -> 62 -> 63
-    # def test_Path08(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 37 -> 62 -> 63
-    # def test_Path09(self):
-        
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 37 -> 47 -> 49 -> 62 -> 63
-    # def test_Path10(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 37 -> 47 -> 49 -> 62 -> 63
-    # def test_Path11(self):
-        
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 37 -> 47 -> 49 -> 50 -> 55 -> 56 -> 49 -> 62 -> 63
-    # def test_Path12(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 37 -> 47 -> 49 -> 50 -> 55 -> 56 -> 49 -> 62 -> 63
-    # def test_Path13(self):
-        
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 37 -> 47 -> 49 -> 50 -> 55 -> 58-> 49 -> 62 -> 63
-    # def test_Path14(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 37 -> 47 -> 49 -> 50 -> 55 -> 58-> 49 -> 62 -> 63
-    # def test_Path15(self):
-        
-    
-    # #   21 -> 22 -> 23 -> 29 -> 36 -> 37 -> 47 -> 49 -> 50 -> 55 -> 49 -> 62 -> 63
-    # def test_Path16(self):
-        
-    
-    # #   21 -> 22 -> 26 -> 29 -> 36 -> 37 -> 47 -> 49 -> 50 -> 55 -> 49 -> 62 -> 63
-    # def test_Path17(self):
-        
-    
 if __name__ == '__main__':
     unittest.main()
