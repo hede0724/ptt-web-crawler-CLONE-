@@ -45,7 +45,7 @@ class PttWebCrawler(object):
         if args.i:
             start = args.i[0]
             if args.i[1] == -1:
-                end = self.Stub_getLastPage(board)
+                end = self.getLastPage(board)
                 #end = self.getLastPage(board)
             else:
                 end = args.i[1]
@@ -57,7 +57,7 @@ class PttWebCrawler(object):
             #print('AuthorName=',AuthorName)
             #print('pushNum=',PushNum)
             self.store(filename, u'{"articles": [', 'w')
-            if(self.InputIsValid(start,end,board,self.Stub_getLastPage(board))):
+            if(self.InputIsValid(start,end,board,self.getLastPage(board))):
                 for i in range(end-start+1):
                     index = start + i
                     print('Processing index:', str(index))
@@ -77,10 +77,11 @@ class PttWebCrawler(object):
                             link = PTT_URL + href
                             article_id = re.sub('\.html', '', href.split('/')[-1])
                             if((args.p and (self.Stub_getPush(link, article_id, board) > PushNum)) or not args.p  ):
-                                if div == divs[-1] and i == end-start:  # last div of last page
-                                    self.store(filename, self.parse(link, article_id, board), 'a')
-                                else:
-                                    self.store(filename, self.parse(link, article_id, board) + ',', 'a')
+                                if((args.n and self.Stub_isEqualWithName(link, article_id, board,AuthorName)) or not args.n):
+                                    if div == divs[-1] and i == end-start:  # last div of last page
+                                        self.store(filename, self.parse(link, article_id, board), 'a')
+                                    else:
+                                        self.store(filename, self.parse(link, article_id, board) + ',', 'a')
                         except:
                             pass
                     time.sleep(0.1)
